@@ -1,110 +1,37 @@
 import random
-import time
-
-def calculate_score(attempts_left, time_taken, difficulty):
-    # Base score based on difficulty
-    if difficulty == "easy":
-        base_score = 100
-    elif difficulty == "medium":
-        base_score = 200
-    else:  # hard
-        base_score = 300
-        
-    # Points for remaining attempts (50 points each)
-    attempt_bonus = attempts_left * 50
-    
-    # Time bonus
-    if time_taken <= 10:
-        time_bonus = 200  # Super fast bonus
-    elif time_taken <= 20:
-        time_bonus = 100  # Fast bonus
-    elif time_taken <= 30:
-        time_bonus = 50   # Quick bonus
-    else:
-        time_bonus = 0
-        
-    return base_score + attempt_bonus + time_bonus
 
 def play_game(difficulty):
-    start_time = time.time()
-    
+    # Set range and attempts based on difficulty
     if difficulty == "easy":
         number_range = (1, 50)
-        max_attempts = 5
+        max_attempts = 10
     elif difficulty == "medium":
         number_range = (1, 100)
-        max_attempts = 7
+        max_attempts = 8
     else:  # hard
         number_range = (1, 200)
-        max_attempts = 10
+        max_attempts = 6
     
     secret_number = random.randint(number_range[0], number_range[1])
-    attempts = max_attempts
+    attempts = 0
     
-    print(f"\nI'm thinking of a number between {number_range[0]} and {number_range[1]}")
-    print(f"You have {attempts} attempts to guess it!")
+    print(f"\nWelcome to Guess My Number!")
+    print(f"I'm thinking of a number between {number_range[0]} and {number_range[1]}")
+    print(f"You have {max_attempts} attempts to guess it.")
     
-    while attempts > 0:
+    while attempts < max_attempts:
         try:
             guess = int(input("\nEnter your guess: "))
             
+            # Check if guess is within valid range
             if guess < number_range[0] or guess > number_range[1]:
                 print(f"Please enter a number between {number_range[0]} and {number_range[1]}")
                 continue
                 
-            attempts -= 1
-            
-            if guess == secret_number:
-                time_taken = round(time.time() - start_time, 1)
-                score = calculate_score(attempts, time_taken, difficulty)
-                print(f"\nCongratulations! You got it in {max_attempts - attempts} attempts!")
-                print(f"Time taken: {time_taken} seconds")
-                print(f"\nYour score: {score} points")
-                print("\nScore breakdown:")
-                print(f"Base score for {difficulty} mode: {100 if difficulty=='easy' else 200 if difficulty=='medium' else 300}")
-                print(f"Attempts bonus: {attempts * 50} (50 points × {attempts} attempts left)")
-                if time_taken <= 10:
-                    print("Time bonus: 200 (Super fast!)")
-                elif time_taken <= 20:
-                    print("Time bonus: 100 (Fast!)")
-                elif time_taken <= 30:
-                    print("Time bonus: 50 (Quick!)")
-                else:
-                    print("No time bonus")
-                return True
+            attempts += 1
+            attempts_left = max_attempts - attempts
             
             if guess < secret_number:
-                print(f"Too low! You have {attempts} attempts left")
-            else:
-                print(f"Too high! You have {attempts} attempts left")
-                
-        except ValueError:
-            print("Please enter a valid number!")
-            
-    print(f"\nGame Over! The number was {secret_number}")
-    return False
-
-def main():
-    while True:
-        print("\n=== Number Guessing Game ===")
-        print("1. Easy (1-50)")
-        print("2. Medium (1-100)")
-        print("3. Hard (1-200)")
-        print("4. Quit")
-        
-        choice = input("\nSelect difficulty (1-4): ")
-        
-        if choice == "4":
-            print("Thanks for playing!")
-            break
-        elif choice == "1":
-            play_game("easy")
-        elif choice == "2":
-            play_game("medium")
-        elif choice == "3":
-            play_game("hard")
-        else:
-            print("Invalid choice! Please select 1, 2, 3, or 4")
-
-if __name__ == "__main__":
-    main()
+                print(f"Too low! You have {attempts_left} attempts left.")
+            elif guess > secret_number:
+                print(f"
