@@ -1,149 +1,110 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Number Guessing Game</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-        }
+import random
+import time
+
+def calculate_score(attempts_left, time_taken, difficulty):
+    # Base score based on difficulty
+    if difficulty == "easy":
+        base_score = 100
+    elif difficulty == "medium":
+        base_score = 200
+    else:  # hard
+        base_score = 300
         
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid black;
-        }
+    # Points for remaining attempts (50 points each)
+    attempt_bonus = attempts_left * 50
+    
+    # Time bonus
+    if time_taken <= 10:
+        time_bonus = 200  # Super fast bonus
+    elif time_taken <= 20:
+        time_bonus = 100  # Fast bonus
+    elif time_taken <= 30:
+        time_bonus = 50   # Quick bonus
+    else:
+        time_bonus = 0
         
-        .button {
-            padding: 10px 20px;
-            margin: 5px;
-        }
+    return base_score + attempt_bonus + time_bonus
+
+def play_game(difficulty):
+    start_time = time.time()
+    
+    if difficulty == "easy":
+        number_range = (1, 50)
+        max_attempts = 5
+    elif difficulty == "medium":
+        number_range = (1, 100)
+        max_attempts = 7
+    else:  # hard
+        number_range = (1, 200)
+        max_attempts = 10
+    
+    secret_number = random.randint(number_range[0], number_range[1])
+    attempts = max_attempts
+    
+    print(f"\nI'm thinking of a number between {number_range[0]} and {number_range[1]}")
+    print(f"You have {attempts} attempts to guess it!")
+    
+    while attempts > 0:
+        try:
+            guess = int(input("\nEnter your guess: "))
+            
+            if guess < number_range[0] or guess > number_range[1]:
+                print(f"Please enter a number between {number_range[0]} and {number_range[1]}")
+                continue
+                
+            attempts -= 1
+            
+            if guess == secret_number:
+                time_taken = round(time.time() - start_time, 1)
+                score = calculate_score(attempts, time_taken, difficulty)
+                print(f"\nCongratulations! You got it in {max_attempts - attempts} attempts!")
+                print(f"Time taken: {time_taken} seconds")
+                print(f"\nYour score: {score} points")
+                print("\nScore breakdown:")
+                print(f"Base score for {difficulty} mode: {100 if difficulty=='easy' else 200 if difficulty=='medium' else 300}")
+                print(f"Attempts bonus: {attempts * 50} (50 points × {attempts} attempts left)")
+                if time_taken <= 10:
+                    print("Time bonus: 200 (Super fast!)")
+                elif time_taken <= 20:
+                    print("Time bonus: 100 (Fast!)")
+                elif time_taken <= 30:
+                    print("Time bonus: 50 (Quick!)")
+                else:
+                    print("No time bonus")
+                return True
+            
+            if guess < secret_number:
+                print(f"Too low! You have {attempts} attempts left")
+            else:
+                print(f"Too high! You have {attempts} attempts left")
+                
+        except ValueError:
+            print("Please enter a valid number!")
+            
+    print(f"\nGame Over! The number was {secret_number}")
+    return False
+
+def main():
+    while True:
+        print("\n=== Number Guessing Game ===")
+        print("1. Easy (1-50)")
+        print("2. Medium (1-100)")
+        print("3. Hard (1-200)")
+        print("4. Quit")
         
-        .game-area {
-            display: none;
-            margin-top: 20px;
-        }
+        choice = input("\nSelect difficulty (1-4): ")
         
-        .message {
-            margin: 10px 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Guess The Number</h1>
-        
-        <div id="level-select">
-            <h2>Select Level</h2>
-            <button class="button" onclick="startGame('easy')">Easy (1-50)</button>
-            <button class="button" onclick="startGame('medium')">Medium (1-100)</button>
-            <button class="button" onclick="startGame('hard')">Hard (1-200)</button>
-        </div>
+        if choice == "4":
+            print("Thanks for playing!")
+            break
+        elif choice == "1":
+            play_game("easy")
+        elif choice == "2":
+            play_game("medium")
+        elif choice == "3":
+            play_game("hard")
+        else:
+            print("Invalid choice! Please select 1, 2, 3, or 4")
 
-        <div id="game-area" class="game-area">
-            <p id="attempts">Attempts left: 5</p>
-            <p id="range"></p>
-            <input type="number" id="guess" placeholder="Enter your guess">
-            <button class="button" onclick="checkGuess()">Submit</button>
-            <p id="message" class="message"></p>
-            <button class="button" onclick="resetGame()">New Game</button>
-        </div>
-    </div>
-
-    <script>
-        let secretNumber;
-        let attempts;
-        let maxAttempts;
-        let gameRange;
-
-        function startGame(level) {
-            // Hide level select and show game area
-            document.getElementById('level-select').style.display = 'none';
-            document.getElementById('game-area').style.display = 'block';
-            
-            // Set game parameters based on level
-            switch(level) {
-                case 'easy':
-                    gameRange = [1, 50];
-                    maxAttempts = 5;
-                    break;
-                case 'medium':
-                    gameRange = [1, 100];
-                    maxAttempts = 7;
-                    break;
-                case 'hard':
-                    gameRange = [1, 200];
-                    maxAttempts = 10;
-                    break;
-            }
-            
-            // Initialize game
-            secretNumber = Math.floor(Math.random() * (gameRange[1] - gameRange[0] + 1)) + gameRange[0];
-            attempts = maxAttempts;
-            updateDisplay();
-        }
-
-        function updateDisplay() {
-            document.getElementById('attempts').textContent = `Attempts left: ${attempts}`;
-            document.getElementById('range').textContent = 
-                `Guess a number between ${gameRange[0]} and ${gameRange[1]}`;
-            document.getElementById('message').textContent = '';
-            document.getElementById('guess').value = '';
-        }
-
-        function checkGuess() {
-            const guessInput = document.getElementById('guess');
-            const guess = parseInt(guessInput.value);
-            const messageElement = document.getElementById('message');
-            
-            // Validate input
-            if (isNaN(guess) || guess < gameRange[0] || guess > gameRange[1]) {
-                messageElement.textContent = `Please enter a valid number between ${gameRange[0]} and ${gameRange[1]}`;
-                return;
-            }
-            
-            attempts--;
-            document.getElementById('attempts').textContent = `Attempts left: ${attempts}`;
-            
-            // Check guess
-            if (guess === secretNumber) {
-                messageElement.textContent = 'Congratulations! You got it!';
-                disableGame();
-            } else {
-                if (attempts === 0) {
-                    messageElement.textContent = `Game Over! The number was ${secretNumber}`;
-                    disableGame();
-                } else {
-                    messageElement.textContent = guess < secretNumber ? 'Too low!' : 'Too high!';
-                }
-            }
-            
-            guessInput.value = '';
-            guessInput.focus();
-        }
-
-        function disableGame() {
-            document.getElementById('guess').disabled = true;
-            document.querySelector('button[onclick="checkGuess()"]').disabled = true;
-        }
-
-        function resetGame() {
-            document.getElementById('level-select').style.display = 'block';
-            document.getElementById('game-area').style.display = 'none';
-            document.getElementById('guess').disabled = false;
-            document.querySelector('button[onclick="checkGuess()"]').disabled = false;
-        }
-
-        // Add keyboard support
-        document.getElementById('guess').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkGuess();
-            }
-        });
-    </script>
-</body>
-</html>
+if __name__ == "__main__":
+    main()
